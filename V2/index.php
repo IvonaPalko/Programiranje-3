@@ -13,12 +13,12 @@ Flight::route('/', function(){
 Flight::route('/radnoMjesto', function(){
     // dohvaćanje podataka iz baze
     $db = Flight::db();
-    $izraz = $db->prepare("select * from randnomjesto");
+    $izraz = $db->prepare("select * from radnomjesto");
     $izraz->execute();
     $rezultati = $izraz->fetchAll(PDO::FETCH_OBJ);
     echo json_encode($rezultati);
 });
 
 // Register class with constructor parameters
-Flight::register('db', 'PDO', array('mysql:host=localhost;dbname=p3api','root',''));
+Flight::register('db', 'PDO', array('mysql:host=localhost;dbname=v2','root',''));
 Flight::start();
