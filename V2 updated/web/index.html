@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/stil.css" />
+
+    <title>Web klijent</title>
+  </head>
+  <body>
+    <h1>Radna mjesta</h1>
+<a id="osvjezi" href="#">Osvježi podatke</a>
+    <table>
+      <thead>
+        <tr>
+          <th>Naziv</th>
+          <th>Opis</th>
+          <th>Osnovica</th>
+          <th>Satnica</th>
+          <th>Vrsta zaposlenja</th>
+          <th>Akcija</th>
+        </tr>
+      </thead>
+      <tbody id="podaci"><tbody>
+    </table>
+
+    <form action="get" id="forma">
+      <label for="naziv">Naziv</label>
+      <input type="text" id="naziv" name="naziv"/>
+      <label for="opis">Opis</label>
+      <input type="text" id="opis" name="opis"/>
+      <label for="osnovica">Osnovica</label>
+      <input type="text" id="osnovica" name="osnovica"/>
+      <label for="satnica">Satnica</label>
+      <input type="text" id="satnica" name="satnica"/>
+      <label for="neodredeno">Vrsta zaposlenja</label>
+      <input type="text" id="neodredeno" name="neodredeno"/>
+    </form>
+    <a id="dodaj" href="#">Dodaj novi</a>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script
+  src="https://code.jquery.com/jquery-3.3.1.js"
+  integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+  crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+
+      $("#dodaj").click(function(){
+        var json={};
+       //console.log($("#forma").serializeArray());
+        $.each($("#forma").serializeArray(),function(){
+          json[this.name]=this.value || "";
+        });
+        //console.log(json);
+        var jsonString = JSON.stringify(json);
+        //console.log(jsonString);
+
+          $.ajax({
+            type: "POST",
+            url: "../radnomjesto/dodaj",
+            contentType: "application/json; charset=utf-8",
+            data: jsonString,
+            success: function(rezultat){
+              if(rezultat==="OK"){
+                osvjeziStanje();
+              }else{
+                alert("Pogreška kod dodavanja");
+              }
+            }
+          });
+
+
+        return false;
+      });
+
+      $("#osvjezi").click(function(){
+
+        osvjeziStanje();
+
+        return false;
+      });
+
+      function osvjeziStanje(){
+        $.ajax({
+            url: "../radnomjesto",
+            cache: false,
+            success: function(html){
+              //loše
+              //$("#podaci").html("");
+                //bolje
+                var podaci = document.getElementById("podaci");
+                while(podaci.firstChild){
+                  podaci.removeChild(podaci.firstChild);
+                }
+
+                var podaci = JSON.parse(html);
+                $.each(podaci,function(kljuc,v){
+                  /*
+                  //LOŠE
+                    $("#podaci").append(
+                        "<tr>" +
+                          "<td>" + v.naziv      + "</td>" +
+                          "<td>" + v.opis       + "</td>" +
+                          "<td>" + v.osnovica   + "</td>" +
+                          "<td>" + v.satnica    + "</td>" +
+                          "<td>" + v.neodredeno + "</td>" +
+                          "<td>P B</td>" +
+                        "</tr>"
+                    );
+                    */
+                    //BOLJE
+                    dodajRed(v);
+                });
+                definirajDogadaje();
+            }
+        });
+      }
+
+      osvjeziStanje();
+
+      function dodajRed(v){
+        var tr = document.createElement("tr");
+        
+        tr = dodajCeliju(tr, v.naziv);
+        tr = dodajCeliju(tr, v.opis);
+        tr = dodajCeliju(tr, v.osnovica);
+        tr = dodajCeliju(tr, v.satnica);
+        tr = dodajCeliju(tr, v.neodredeno);
+        //tr = dodajCeliju(tr, "P B");
+
+        var a = document.createElement("a");
+        a.setAttribute("id","rm_" + v.sifra);
+        a.setAttribute("href","#");
+        a.setAttribute("class", "brisi");
+        a.appendChild(document.createTextNode("B"));
+        var td = document.createElement("td");
+        td.appendChild(a);
+        tr.appendChild(td);
+
+        var podaci = document.getElementById("podaci");
+        podaci.appendChild(tr);
+        
+      }
+
+      function dodajCeliju(tr, tekst){
+        var td = document.createElement("td");
+        var sadrzaj = document.createTextNode(tekst);
+        td.appendChild(sadrzaj);
+        tr.appendChild(td);
+        return tr;
+      }
+
+      function definirajDogadaje(){
+
+    
+      $(".brisi").click(function(){
+        var a = $(this);
+        var id=a.attr("id").split("_")[1];
+
+        $.ajax({
+            type: "GET",
+            url: "../radnomjesto/obrisi/" + id,
+            success: function(rezultat){
+              if(rezultat==="OK"){
+                //loše
+                //osvjeziStanje();
+                //bolje
+                a.parent().parent().remove();
+              }else{
+                alert("Pogreška kod brisanja");
+              }
+            }
+          });
+
+        return false;
+      });
+    }
+    </script>
+  </body>
+</html>
