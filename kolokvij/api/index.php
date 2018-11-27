@@ -66,8 +66,8 @@ Flight::map('notFound', function(){
 
 
 //LOKALNO
-Flight::register('db', 'PDO', array('mysql:host=localhost;dbname=kolokvij_api;charset=UTF8','root',''));
+//Flight::register('db', 'PDO', array('mysql:host=localhost;dbname=kolokvij_api;charset=UTF8','root',''));
 //SERVER
-//Flight::register('db', 'PDO', array('mysql:host=localhost;dbname=kolokvij_api;charset=UTF8','ipalko','1dc86d1a'));
+Flight::register('db', 'PDO', array('mysql:host=localhost;dbname=ipalko_P3;charset=UTF8','ipalko','1dc86d1a'));
 
 Flight::start();
